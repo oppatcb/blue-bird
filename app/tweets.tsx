@@ -38,8 +38,20 @@ export default function Tweets({ tweets }: {tweets: TweetWithAuthor[]}) {
                 router.refresh();
             }).subscribe();
 
+            const channelLikes = supabase.channel('realtime likes').on('postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'likes',
+            },
+            (payload) => {
+                console.log(payload);
+                router.refresh();
+            }).subscribe();
+
             return () => {
                 supabase.removeChannel(channel);
+                supabase.removeChannel(channelLikes);
             }
 
         }, [supabase, router]
